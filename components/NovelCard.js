@@ -1,31 +1,32 @@
 class NovelCard extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+
+  static get observedAttributes() {
+    return ['title', 'cover', 'desc', 'status', 'tags', 'link'];
+  }
+
+  connectedCallback() {
+    this.render();
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this.render();
     }
+  }
 
-    static get observedAttributes() {
-        return ['title', 'cover', 'desc', 'status', 'tags'];
-    }
+  render() {
+    const title = this.getAttribute('title') || 'Untitled';
+    const cover = this.getAttribute('cover') || '';
+    const desc = this.getAttribute('desc') || '';
+    const status = this.getAttribute('status') || '';
+    const tags = JSON.parse(this.getAttribute('tags') || '[]');
+    const link = this.getAttribute('link');
 
-    connectedCallback() {
-        this.render();
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (oldValue !== newValue) {
-            this.render();
-        }
-    }
-
-    render() {
-        const title = this.getAttribute('title') || 'Untitled';
-        const cover = this.getAttribute('cover') || '';
-        const desc = this.getAttribute('desc') || '';
-        const status = this.getAttribute('status') || '';
-        const tags = JSON.parse(this.getAttribute('tags') || '[]');
-
-        this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
       <style>
         :host {
           display: block;
@@ -50,6 +51,8 @@ class NovelCard extends HTMLElement {
           display: flex;
           flex-direction: column;
           height: 100%;
+          text-decoration: none; /* For when it's an anchor */
+          color: inherit;
         }
 
         .card:hover {
@@ -90,6 +93,7 @@ class NovelCard extends HTMLElement {
           font-size: 0.75rem;
           letter-spacing: 0.05em;
           backdrop-filter: blur(4px);
+          z-index: 10;
         }
 
         .content {
@@ -132,33 +136,6 @@ class NovelCard extends HTMLElement {
           flex-grow: 1;
         }
 
-        .read-more {
-          align-self: flex-start;
-          color: #2B3A67;
-          text-decoration: none;
-          font-size: 0.85rem;
-          font-weight: 600;
-          border-bottom: 1px solid transparent;
-          transition: border-color 0.3s ease;
-          margin-top: auto;
-          display: inline-flex;
-          align-items: center;
-        }
-
-        .read-more::after {
-          content: '→';
-          margin-left: 6px;
-          transition: transform 0.3s ease;
-        }
-
-        .read-more:hover {
-          border-bottom-color: #2B3A67;
-        }
-
-        .read-more:hover::after {
-          transform: translateX(4px);
-        }
-
         @media (max-width: 768px) {
           .cover-container {
             padding-top: 70%;
@@ -166,7 +143,7 @@ class NovelCard extends HTMLElement {
         }
       </style>
 
-      <div class="card">
+      ${link ? `<a href="${link}" class="card" target="_blank" rel="noopener noreferrer">` : '<div class="card">'}
         <div class="cover-container">
           <img src="${cover}" alt="${title}" class="cover-image" loading="lazy">
           <span class="status-badge">${status}</span>
@@ -177,11 +154,10 @@ class NovelCard extends HTMLElement {
           </div>
           <h3 class="title">${title}</h3>
           <p class="desc">${desc}</p>
-          <a href="#" class="read-more">Read details</a>
         </div>
-      </div>
+      ${link ? '</a>' : '</div>'}
     `;
-    }
+  }
 }
 
 customElements.define('novel-card', NovelCard);

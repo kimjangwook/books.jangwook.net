@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
         card.setAttribute('desc', novel.description);
         card.setAttribute('status', novel.status);
         card.setAttribute('tags', JSON.stringify(novel.tags));
+        if (novel.link) card.setAttribute('link', novel.link);
 
         container.appendChild(card);
     });
